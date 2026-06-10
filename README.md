@@ -316,3 +316,78 @@ Iso dapat diunduh di
    ```
 
 ---
+
+## **OPSIONAL**
+### Install Desktop Environment
+1. Install Desktop Environment XFCE
+   ```
+   sudo apt install xubuntu-desktop task-xfce-desktop -y
+   ```
+2. Lakukan restart untuk mengaplikasikannya.
+   ```
+   reboot
+   ```
+
+### Copy File on SSH
+1. Copy file dari server ke lokal
+   ```
+   scp [Username]@[IP/Domain]:[Path File Server] [Path File Lokal]
+   ```
+2. Copy file dari lokal ke server
+   ```
+   scp [Path File Lokal] [Username]@[IP/Domain]:[Path File Server] 
+   ```
+
+### SSH Client
+1. Windows
+   - Install
+     - https://github.com/cloudflare/cloudflared/releases/download/2026.3.0/cloudflared-windows-amd64.exe
+     - https://github.com/cloudflare/cloudflared/releases/download/2026.3.0/cloudflared-windows-amd64.msi
+     - Connect
+       ```
+       ssh -o "ProxyCommand=cloudflared access ssh --hostname ssh.zeroxx.my.id" [Username]@ssh.zeroxx.my.id
+       ```
+2. Linux Debian
+   - Install
+     ```
+     wget https://github.com/cloudflare/cloudflared/releases/download/2026.3.0/cloudflared-linux-amd64.deb
+     sudo dpkg -i cloudflared-linux-amd64.deb
+     ```
+   - Connect
+     ```
+     ssh -o "ProxyCommand=cloudflared access ssh --hostname ssh.zeroxx.my.id" [Username]@ssh.zeroxx.my.id
+     ```
+3. Mac Intel
+   - Install melalui package manager
+     ```
+     brew install cloudflared
+     ```
+   - Install melalui package binary
+     ```
+     curl -O https://github.com/cloudflare/cloudflared/releases/download/2026.3.0/cloudflared-darwin-amd64.tgz
+     tar -xvzf cloudflared-darwin-amd64.tgz
+     sudo mv cloudflared /usr/local/bin/
+     sudo chmod +x /usr/local/bin/cloudflared
+     ```
+   - Connect
+     ```
+     ssh -o "ProxyCommand=/usr/local/bin/cloudflared access ssh --hostname ssh.zeroxx.my.id" [Username]@ssh.zeroxx.my.id
+     ```
+4. Mac M1/M2/M3 (Apple Silicon)
+   - Install melalui package manager
+     ```
+     brew install cloudflared
+     ```
+   - Install melalui package binary
+     ```
+     curl -O https://github.com/cloudflare/cloudflared/releases/download/2026.3.0/cloudflared-darwin-arm64.tgz
+     tar -xvzf cloudflared-darwin-arm64.tgz
+     sudo mv cloudflared /usr/local/bin/
+     sudo chmod +x /usr/local/bin/cloudflared
+     ```
+   - Connect
+     ```
+     ssh -o "ProxyCommand=/usr/local/bin/cloudflared access ssh --hostname ssh.zeroxx.my.id" [Username]@ssh.zeroxx.my.id
+     ```
+
+---
