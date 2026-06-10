@@ -256,11 +256,11 @@ Iso dapat diunduh di
 6. Install dan Run Connector dengan Operating System `Debian`
 7. Buat direktori `scripts`
    ```
-   sudo mkdir -p /opt/scripts
+   sudo mkdir -p /root/setup-scripts/
    ```
 8. Buat shell script agar memudahkan
    ```
-   sudo vi /opt/scripts/cloudflare.sh
+   sudo vi /root/setup-scripts/cloudflare.sh
    ```
 9. Tambahkan script berikut
    ```
@@ -275,15 +275,15 @@ Iso dapat diunduh di
    sudo apt-get update && sudo apt-get install cloudflared
 
    # Install Token
-   sudo cloudflared service install [Token]
+   sudo cloudflared service install [TOKEN]
    ```
 10. Beri izin eksekusi
     ```
-    sudo chmod +x /opt/scripts/cloudflare.sh
+    sudo chmod +x /root/setup-scripts/cloudflare.sh
     ```
 11. Jalankan scriptnya
     ```
-    /opt/scripts/cloudflare.sh
+    sudo /root/setup-scripts/cloudflare.sh
     ```
 12. Isi Hostname `Subdomain` <- ssh, `Domain` <- zeroxx.my.id
 13. Isi Service `Type` <- ssh, `URL` <- localhost:22
@@ -316,7 +316,73 @@ Iso dapat diunduh di
    ```
 
 ---
+
 ## **CORE CONFIGURATION**
+### RAID 1
+1. Install tools `mdadm`
+   ```
+   sudo apt install mdadm -y
+   ```
+2. Buat RAID antara `sdb` dan `sdc`
+   ``` 
+   sudo mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc
+   ```
+3. Untuk mengecek status sinkronisasi
+   ```
+   cat /proc/mdstat
+   ```
+4. Format `md0` menjadi file sistem bertipe `ext4`
+   ```
+   sudo mkfs.ext4 /dev/md0
+   ```
+5. Buat direktori `/srv`
+   ```
+   sudo mkdir -p /srv
+   ```
+6. Mount disk `md0` ke partisi `/srv` 
+   ```
+   sudo mount /dev/md0 /srv
+   ```
+7. Update konfigurasi di `mdadm`
+   ```
+   sudo mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
+   ```
+8. Update `initramfs`
+   ```
+   sudo update-initramfs -u
+   ```
+9. Cek UUID `md0`
+   ```
+   sudo blkid /dev/md0
+   ```
+10. Masukan UUID tersebut ke `fstab`
+    ```
+    sudo vi /etc/fstab
+    ```
+12. Masukan konfigurasi berikut
+    ```
+    UUID=[UUID md0] <- UUID=7e9ff6a4-59bf-4711-8713-4da219ff863d /srv  ext4  defaults  0  2
+    ```
+13. Reload `systemd` untuk mengaplikasikannya
+    ```
+    sudo systemctl daemon-reload
+    ```
+
+#### Verifikasi RAID
+1. Unmount partisi `/srv`
+   ```
+   sudo umount /srv
+   ```
+2. Test Auto-Mount dari `fstab`
+   ```
+   sudo mount -a
+   ```
+3. Cek status
+   ```
+   df -h | grep /srv
+   ```
+
+---
 
 ### AUTOMATION CONFIGURATION
 #### Membuat Service Startup Update
@@ -356,6 +422,7 @@ Iso dapat diunduh di
 6. Cek Log Service Spesifik
    ```
    journalctl -u [nama].service
+   ```
 
 #### Otomasi Reboot Pada 00.00
 1. Edit jadwal di `crontab`
@@ -369,6 +436,43 @@ Iso dapat diunduh di
 3. Mengecek jadwal yang berjalan
    ```
    sudo crontab -l
+   ```
+
+---
+
+### WEB SERVER
+#### Apache Configuration
+1. Install Apache
+   ```
+   sudo apt install apache2 -y
+   ```
+2. Buat folder web di RAID
+   ```
+   sudo mkdir -p /srv/www/html
+   ```
+3. Edit konfigurasi default Apache
+   ```
+   sudo vi /etc/apache2/sites-available/000-default.conf
+   ```
+4. Ubah konfigurasi sebagai berikut
+   ```
+   DocumentRoot /srv/www/html
+   ```
+5. Edit konfigurasi utama Apache
+   ```
+   sudo vi /etc/apache2/apache2.conf
+   ```
+6. Ubah konfigurasi sebagai berikut
+   ```
+   <Directory /srv/www/>
+      Options Indexes FollowSymLinks
+      AllowOverride None
+      Require all granted
+   </Directory>
+   ```
+7. Restart service Apache
+   ```
+   sudo systemctl restart apache2
    ```
 
 ---
@@ -445,5 +549,3 @@ Iso dapat diunduh di
      ```
      ssh -o "ProxyCommand=/usr/local/bin/cloudflared access ssh --hostname ssh.zeroxx.my.id" [Username]@ssh.zeroxx.my.id
      ```
-
----
