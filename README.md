@@ -369,6 +369,7 @@ Iso dapat diunduh di
 3. Mengecek jadwal yang berjalan
    ```
    sudo crontab -l
+   ```
 
 ---
 
