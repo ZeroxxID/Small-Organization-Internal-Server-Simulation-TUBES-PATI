@@ -316,6 +316,61 @@ Iso dapat diunduh di
    ```
 
 ---
+## **CORE CONFIGURATION**
+
+### AUTOMATION CONFIGURATION
+#### Membuat Service Startup Update
+1. Buat service baru di direktori `system`
+   ```
+   sudo vi /etc/systemd/system/startup-update.service
+   ```
+2. Tambahkan konfigurasi berikut
+   ```
+   [Unit]
+   Description=Auto Update and Upgrade on Startup
+   After=network-online.target
+   Wants=network-online.target
+
+   [Service]
+   Type=oneshot
+   ExecStart=/usr/bin/apt update -y
+   ExecStart=/usr/bin/apt upgrade -y
+   StandardOutput=journal
+   StandardError=journal
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+3. Lakukan daemon reload untuk mengaplikasikannya
+   ```
+   sudo systemctl daemon-reload
+   ```
+4. Aktifkan service yang telah dibuat
+   ```
+   sudo systemctl enable startup-update.service
+   ```
+5. Cek Status Service
+   ```
+   systemctl status [nama].service
+   ```
+6. Cek Log Service Spesifik
+   ```
+   journalctl -u [nama].service
+
+#### Otomasi Reboot Pada 00.00
+1. Edit jadwal di `crontab`
+   ```
+   sudo crontab -e
+   ```
+2. Tambahkan konfigurasi berikut
+   ```
+   0 0 * * * /usr/bin/systemctl reboot
+   ```
+3. Mengecek jadwal yang berjalan
+   ```
+   sudo crontab -l
+
+---
 
 ## **OPSIONAL**
 ### Install Desktop Environment
