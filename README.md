@@ -1,4 +1,4 @@
-# **MINI SERVER GUIDE**
+# **Small-Organization-Internal-Server-Simulation-TUBES-PATI**
 ## **Pengenalan**
 ### Virtualisasi
 - Virtualisasi adalah teknologi yang mensimulasikan perangkat keras, sistem operasi, ataupun jaringan di dalam satu mesin fisik 
