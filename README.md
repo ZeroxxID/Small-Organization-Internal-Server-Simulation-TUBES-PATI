@@ -42,3 +42,277 @@ Iso dapat diunduh di
    - Servers Name: ubuntu
    - User: william
    - Password: PATI_Kelompok#4#administrator
+
+
+## **WORST CASE SETELAH INSTALL TANPA** ***source.list***
+1. Tambahan list sumber repository secara manual di direktori Advance Package Tool (APT)
+   ```
+   sudo vi /etc/apt/source.list
+   ```
+2. Tambahkan repositori berikut pada `souce.list` dan berikan `#` pada bagian `deb cdrom:[Ubuntu-Server 24.04 _Noble Numbat_ - Release amd64 (20240423)]/ noble main restricted`
+   ```
+   deb https://mirror.unair.ac.id/ubuntu/ noble main restricted universe multiverse
+   deb-src https://mirror.unair.ac.id/ubuntu/ noble main restricted universe multiverse
+
+   deb https://mirror.unair.ac.id/ubuntu/ noble-updates main restricted universe multiverse
+   deb-src https://mirror.unair.ac.id/ubuntu/ noble-updates main restricted universe multiverse
+
+   deb https://mirror.unair.ac.id/ubuntu/ noble-security main restricted universe multiverse
+   deb-src https://mirror.unair.ac.id/ubuntu/ noble-security main restricted universe multiverse
+
+   deb https://mirror.unair.ac.id/ubuntu/ noble-backports main restricted universe multiverse
+   deb-src https://mirror.unair.ac.id/ubuntu/ noble-backports main restricted universe multiverse
+
+   deb https://mirror.unair.ac.id/ubuntu/ noble-proposed main restricted universe multiverse
+   deb-src https://mirror.unair.ac.id/ubuntu/ noble-proposed main restricted universe multiverse
+   ```
+
+---
+
+## **BASIC CONFIGURATION**
+### SSH Server
+1. Install SSH Server
+   ```
+   sudo apt install openssh-server
+   ```
+2. Aktifkan service `ssh`
+   ```
+   sudo systemctl enable ssh
+   ```
+3. Ubah sedikit konfigurasi `ssh`
+   ```
+   sudo vi /etc/ssh/sshd_config
+   ```
+4. Masukan konfigurasi berikut
+   ```
+   # This is the sshd server system-wide configuration file.  See
+   # sshd_config(5) for more information.
+
+   # This sshd was compiled with PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
+
+   # The strategy used for options in the default sshd_config shipped with
+   # OpenSSH is to specify options with their default value where
+   # possible, but leave them commented.  Uncommented options override the
+   # default value.
+
+   Include /etc/ssh/sshd_config.d/*.conf
+
+   # When systemd socket activation is used (the default), the socket
+   # configuration must be re-generated after changing Port, AddressFamily, or
+   # ListenAddress.
+   #
+   # For changes to take effect, run:
+   #
+   #   systemctl daemon-reload
+   #   systemctl restart ssh.socket
+   #
+   Port 22
+   #AddressFamily any
+   #ListenAddress 0.0.0.0
+   #ListenAddress ::
+
+   #HostKey /etc/ssh/ssh_host_rsa_key
+   #HostKey /etc/ssh/ssh_host_ecdsa_key
+   #HostKey /etc/ssh/ssh_host_ed25519_key
+
+   # Ciphers and keying
+   #RekeyLimit default none
+
+   # Logging
+   #SyslogFacility AUTH
+   #LogLevel INFO
+
+   # Authentication:
+
+   LoginGraceTime 1m
+   PermitRootLogin no
+   StrictModes yes
+   MaxAuthTries 3
+   #MaxSessions 10
+
+   #PubkeyAuthentication yes
+
+   # Expect .ssh/authorized_keys2 to be disregarded by default in future.
+   #AuthorizedKeysFile	.ssh/authorized_keys .ssh/authorized_keys2
+
+   #AuthorizedPrincipalsFile none
+
+   #AuthorizedKeysCommand none
+   #AuthorizedKeysCommandUser nobody
+
+   # For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
+   #HostbasedAuthentication no
+   # Change to yes if you don't trust ~/.ssh/known_hosts for
+   # HostbasedAuthentication
+   #IgnoreUserKnownHosts no
+   # Don't read the user's ~/.rhosts and ~/.shosts files
+   #IgnoreRhosts yes
+
+   # To disable tunneled clear text passwords, change to no here!
+   #PasswordAuthentication yes
+   #PermitEmptyPasswords no
+
+   # Change to yes to enable challenge-response passwords (beware issues with
+   # some PAM modules and threads)
+   KbdInteractiveAuthentication no
+
+   # Kerberos options
+   #KerberosAuthentication no
+   #KerberosOrLocalPasswd yes
+   #KerberosTicketCleanup yes
+   #KerberosGetAFSToken no
+
+   # GSSAPI options
+   #GSSAPIAuthentication no
+   #GSSAPICleanupCredentials yes
+   #GSSAPIStrictAcceptorCheck yes
+   #GSSAPIKeyExchange no
+
+   # Set this to 'yes' to enable PAM authentication, account processing,
+   # and session processing. If this is enabled, PAM authentication will
+   # be allowed through the KbdInteractiveAuthentication and
+   # PasswordAuthentication.  Depending on your PAM configuration,
+   # PAM authentication via KbdInteractiveAuthentication may bypass
+   # the setting of "PermitRootLogin prohibit-password".
+   # If you just want the PAM account and session checks to run without
+   # PAM authentication, then enable this but set PasswordAuthentication
+   # and KbdInteractiveAuthentication to 'no'.
+   UsePAM yes
+
+   #AllowAgentForwarding yes
+   #AllowTcpForwarding yes
+   #GatewayPorts no
+   X11Forwarding yes
+   #X11DisplayOffset 10
+   #X11UseLocalhost yes
+   #PermitTTY yes
+   PrintMotd no
+   #PrintLastLog yes
+   #TCPKeepAlive yes
+   #PermitUserEnvironment no
+   #Compression delayed
+   #ClientAliveInterval 0
+   #ClientAliveCountMax 3
+   #UseDNS no
+   #PidFile /run/sshd.pid
+   #MaxStartups 10:30:100
+   #PermitTunnel no
+   #ChrootDirectory none
+   #VersionAddendum none
+
+   # no default banner path
+   #Banner none
+
+   # Allow client to pass locale environment variables
+   AcceptEnv LANG LC_*
+
+   # override default of no subsystems
+   Subsystem	sftp	/usr/lib/openssh/sftp-server
+
+   # Example of overriding settings on a per-user basis
+   #Match User anoncvs
+   #	X11Forwarding no
+   #	AllowTcpForwarding no
+   #	PermitTTY no
+   #	ForceCommand cvs server
+   ```
+5. Restart service SSH
+   ```
+   sudo systemctl restart ssh
+   ```
+
+### Configure Network Adapter
+1. Pada Ubuntu Server menggunakan netplan sebagai service nya
+   ```
+   sudo vi /etc/netplan/50-cloud-init.yaml
+   ```
+2. Tambahkan konfigurasi berikut ke `50-cloud-init.yaml`
+   ```
+   network:
+     version: 2
+     ethernets:
+       [Interface]: <- ens33:
+         dhcp4: true
+       [Interface]: <- ens34:
+         dhcp4: false
+         addresses:
+           - IP/CIDR <- 2.2.2.2/8
+       [Interface]: <- ens35:
+         dhcp4: false
+         addresses:
+           - IP/CIDR <- 20.20.20.20/24 | 20.20.20.22/24
+   ```
+3. Aplikasikan konfigurasi `netplan`
+   ```
+   sudo netplan apply
+   ```
+
+### Tunneling SSH dengan Domain
+1. Buka `cloudflare` dan login: https://cloudflare.com/
+2. Klik `Zero Trust` pada menu Protect & Connect
+3. Klik menu `Network` dan pilih submenu `Overview`
+4. Klik `Manage Tunnels`, klik `Add a Tunnel`
+5. Isi `Tunnel Name` <- PATI
+6. Install dan Run Connector dengan Operating System `Debian`
+7. Buat direktori `scripts`
+   ```
+   sudo mkdir -p /opt/scripts
+   ```
+8. Buat shell script agar memudahkan
+   ```
+   sudo vi /opt/scripts/cloudflare.sh
+   ```
+9. Tambahkan script berikut
+   ```
+   # Add cloudflare gpg key
+   sudo mkdir -p --mode=0755 /usr/share/keyrings
+   curl -fsSL https://pkg.cloudflare.com/cloudflare-public-v2.gpg | sudo tee /usr/share/keyrings/cloudflare-public-v2.gpg >/dev/null
+
+   # Add this repo to your apt repositories
+   echo 'deb [signed-by=/usr/share/keyrings/cloudflare-public-v2.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
+
+   # install cloudflared
+   sudo apt-get update && sudo apt-get install cloudflared
+
+   # Install Token
+   sudo cloudflared service install [Token]
+   ```
+10. Beri izin eksekusi
+    ```
+    sudo chmod +x /opt/scripts/cloudflare.sh
+    ```
+11. Jalankan scriptnya
+    ```
+    /opt/scripts/cloudflare.sh
+    ```
+12. Isi Hostname `Subdomain` <- ssh, `Domain` <- zeroxx.my.id
+13. Isi Service `Type` <- ssh, `URL` <- localhost:22
+
+
+### Network Time Protocol (NTP) Client
+1. Tampilkan detail informasi mengenai waktu
+   ```
+   timedatectl
+   ```
+2. Jika time zone masih wilayah luar
+   ```
+   sudo timedatectl set-timezone Asia/Jakarta
+   ```
+3. Jika NTP Service tidak aktif
+   ```
+   sudo timedatectl set-ntp true
+   ```
+4. Lakukan konfigurasi NTP agar waktu sinkron dengan wilayah Indonesia di direktori `systemd`
+   ```
+   sudo vi /etc/systemd/timesyncd.conf
+   ```
+5. Hilangkan `#` pada bagian `NTP=` dan tambahakan pool seperti berikut
+   ```
+   NTP=id.pool.ntp.org
+   ```
+6. Lakukan restart service untuk mengaplikasikannya
+   ```
+   sudo systemctl restart systemd-timesyncd
+   ```
+
+---
