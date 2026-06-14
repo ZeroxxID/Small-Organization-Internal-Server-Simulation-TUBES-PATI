@@ -1,492 +1,545 @@
-# **SMALL ORGANIZATION INTERNAL SERVER SIMULATION GUIDE**
-## **Pengenalan**
+# SMALL ORGANIZATION INTERNAL SERVER SIMULATION GUIDE
+
+## Pengenalan
 ### Virtualisasi
-- Virtualisasi adalah teknologi yang mensimulasikan perangkat keras, sistem operasi, ataupun jaringan di dalam satu mesin fisik 
-- VirtualBox: https://www.virtualbox.org/wiki/Downloads
-- VMWare Workstation: https://support.broadcom.com/group/ecx/downloads
+Virtualisasi adalah teknologi yang mensimulasikan perangkat keras, sistem operasi, ataupun jaringan di dalam satu mesin fisik. 
+* VirtualBox: https://www.virtualbox.org/wiki/Downloads
+* VMWare Workstation: https://support.broadcom.com/group/ecx/downloads
 
 ---
 
-## **PERSIAPAN**
-### Ubuntu Server
+## PERSIAPAN
+
+### Unduh Ubuntu Server
 Iso dapat diunduh di
-- https://ubuntu.com/download/server
-- https://releases.ubuntu.com/noble/
-- https://mirror.unair.ac.id/ubuntu-cd/ 
+* Global: https://ubuntu.com/download/server
+* Rilis Noble: https://releases.ubuntu.com/noble/
+* Mirror Lokal (Cepat): https://mirror.unair.ac.id/ubuntu-cd/
 
-### Tahap Instalasi
-1. Virtual Machine Configuration
-   - Nama: PATI Kelompok 4
-   - Disk: 64 GB x 3 (1 OS, 2 RAID)
-   - Memory: 8 GB
-   - Procesor: 8 Cores
-   - Network Adapter 
-     - Bridge = DHCP
-     - Custom VMnet2 = Static
-     - Custom VMnet3 = Static
-2. Virtual Machine Configuration Backup
-   - Nama: PATI Kelompok 4 Backup
-   - Disk: 64 GB x 3 (1 OS, 2 RAID)
-   - Memory: 8 GB
-   - Procesor: 8 Cores
-   - Network Adapter 
-     - Bridge = DHCP
-     - Custom VMnet2 = Static
-     - Custom VMnet3 = Static
-
-3. Instalasi OS Ubuntu Server
-   - Bahasa: English
-   - Keyboard Layout: English (US) 
-   - Mirror Address: https://mirror.unair.ac.id/ubuntu
-   - Name: PATI Kelompok 4
-   - Servers Name: ubuntu
-   - User: william
-   - Password: PATI_Kelompok#4#administrator
+### Spesifikasi Virtual Machine (VM)
+* Nama: PATI Kelompok 4
+* Disk: 64 GB x 3 (1 OS utama, 2 disk untuk RAID 1)
+* Memory: 8 GB
+* Procesor: 8 Cores
+* Network Adapter 1 (Bridge): Mode DHCP untuk internet
+* Network Adapter 2 (Custom VMnet2): Mode Static untuk LAN Internal
 
 
-## **WORST CASE SETELAH INSTALL TANPA** ***source.list***
-1. Tambahan list sumber repository secara manual di direktori Advance Package Tool (APT)
+### Instalasi OS Ubuntu Server
+* Bahasa: English
+* Keyboard Layout: English (US) 
+* Mirror Address: https://mirror.unair.ac.id/ubuntu
+* Name: PATI Kelompok 4
+* Servers Name: corp4
+* User: william
+* Password: PATI_Kelompok#4#administrator
+
+---
+
+## REPOSITORI LOKAL (Jika Tanpa source.list)
+1. Edit konfigurasi repositori APT:
+   ```bash
+   sudo vi /etc/apt/sources.list.d/ubuntu.sources
+   # Catatan: Ubuntu 24.04 (Noble) menggunakan format DEB822 di ubuntu.sources, bukan lagi sources.list lama.
    ```
-   sudo vi /etc/apt/source.list
+2. Pastikan alamat URL mengarah ke mirror lokal agar proses instalasi lebih cepat:
    ```
-2. Tambahkan repositori berikut pada `souce.list` dan berikan `#` pada bagian `deb cdrom:[Ubuntu-Server 24.04 _Noble Numbat_ - Release amd64 (20240423)]/ noble main restricted`
-   ```
-   deb https://mirror.unair.ac.id/ubuntu/ noble main restricted universe multiverse
-   deb-src https://mirror.unair.ac.id/ubuntu/ noble main restricted universe multiverse
-
-   deb https://mirror.unair.ac.id/ubuntu/ noble-updates main restricted universe multiverse
-   deb-src https://mirror.unair.ac.id/ubuntu/ noble-updates main restricted universe multiverse
-
-   deb https://mirror.unair.ac.id/ubuntu/ noble-security main restricted universe multiverse
-   deb-src https://mirror.unair.ac.id/ubuntu/ noble-security main restricted universe multiverse
-
-   deb https://mirror.unair.ac.id/ubuntu/ noble-backports main restricted universe multiverse
-   deb-src https://mirror.unair.ac.id/ubuntu/ noble-backports main restricted universe multiverse
-
-   deb https://mirror.unair.ac.id/ubuntu/ noble-proposed main restricted universe multiverse
-   deb-src https://mirror.unair.ac.id/ubuntu/ noble-proposed main restricted universe multiverse
+   URIs: https://mirror.unair.ac.id/ubuntu/
    ```
 
 ---
 
-## **BASIC CONFIGURATION**
-### SSH Server
-1. Install SSH Server
+## BASIC CONFIGURATION
+### Pembuatan Hierarki Direktori
+```bash
+sudo mkdir -p /root/setup-scripts/     # Folder Script Installer
+sudo mkdir -p /srv                     # Root Mount Point RAID
+sudo mkdir -p /srv/projects            # Parent direktori Samba
+sudo mkdir -p /srv/www/html            # DocumentRoot Apache Web Server
+sudo mkdir -p /srv/projects/internal   # Ruang privat Administrator/Developer
+sudo mkdir -p /srv/projects/eksternal  # Ruang publik untuk semua user
+sudo mkdir -p /srv/backups             # Penyimpanan arsip otomatis
+```
+
+### Konfigurasi SSH Server (Hardened)
+1. Install service SSH:
+   ```bash
+   sudo apt install openssh-server -y
    ```
-   sudo apt install openssh-server
-   ```
-2. Aktifkan service `ssh`
-   ```
-   sudo systemctl enable ssh
-   ```
-3. Ubah sedikit konfigurasi `ssh`
-   ```
+2. Amankan konfigurasi daemon SSH:
+   ```bash
    sudo vi /etc/ssh/sshd_config
    ```
-4. Masukan konfigurasi berikut
-   ```
-   # This is the sshd server system-wide configuration file.  See
-   # sshd_config(5) for more information.
-
-   # This sshd was compiled with PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
-
-   # The strategy used for options in the default sshd_config shipped with
-   # OpenSSH is to specify options with their default value where
-   # possible, but leave them commented.  Uncommented options override the
-   # default value.
-
-   Include /etc/ssh/sshd_config.d/*.conf
-
-   # When systemd socket activation is used (the default), the socket
-   # configuration must be re-generated after changing Port, AddressFamily, or
-   # ListenAddress.
-   #
-   # For changes to take effect, run:
-   #
-   #   systemctl daemon-reload
-   #   systemctl restart ssh.socket
-   #
-   Port 22
-   #AddressFamily any
-   #ListenAddress 0.0.0.0
-   #ListenAddress ::
-
-   #HostKey /etc/ssh/ssh_host_rsa_key
-   #HostKey /etc/ssh/ssh_host_ecdsa_key
-   #HostKey /etc/ssh/ssh_host_ed25519_key
-
-   # Ciphers and keying
-   #RekeyLimit default none
-
-   # Logging
-   #SyslogFacility AUTH
-   #LogLevel INFO
-
-   # Authentication:
-
+3. Sesuaikan parameter keamanan berikut:
+   ```plaintext
+   Port 2222
    LoginGraceTime 1m
    PermitRootLogin no
    StrictModes yes
    MaxAuthTries 3
-   #MaxSessions 10
-
-   #PubkeyAuthentication yes
-
-   # Expect .ssh/authorized_keys2 to be disregarded by default in future.
-   #AuthorizedKeysFile	.ssh/authorized_keys .ssh/authorized_keys2
-
-   #AuthorizedPrincipalsFile none
-
-   #AuthorizedKeysCommand none
-   #AuthorizedKeysCommandUser nobody
-
-   # For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
-   #HostbasedAuthentication no
-   # Change to yes if you don't trust ~/.ssh/known_hosts for
-   # HostbasedAuthentication
-   #IgnoreUserKnownHosts no
-   # Don't read the user's ~/.rhosts and ~/.shosts files
-   #IgnoreRhosts yes
-
-   # To disable tunneled clear text passwords, change to no here!
-   #PasswordAuthentication yes
-   #PermitEmptyPasswords no
-
-   # Change to yes to enable challenge-response passwords (beware issues with
-   # some PAM modules and threads)
+   PubkeyAuthentication yes
+   PasswordAuthentication yes
    KbdInteractiveAuthentication no
-
-   # Kerberos options
-   #KerberosAuthentication no
-   #KerberosOrLocalPasswd yes
-   #KerberosTicketCleanup yes
-   #KerberosGetAFSToken no
-
-   # GSSAPI options
-   #GSSAPIAuthentication no
-   #GSSAPICleanupCredentials yes
-   #GSSAPIStrictAcceptorCheck yes
-   #GSSAPIKeyExchange no
-
-   # Set this to 'yes' to enable PAM authentication, account processing,
-   # and session processing. If this is enabled, PAM authentication will
-   # be allowed through the KbdInteractiveAuthentication and
-   # PasswordAuthentication.  Depending on your PAM configuration,
-   # PAM authentication via KbdInteractiveAuthentication may bypass
-   # the setting of "PermitRootLogin prohibit-password".
-   # If you just want the PAM account and session checks to run without
-   # PAM authentication, then enable this but set PasswordAuthentication
-   # and KbdInteractiveAuthentication to 'no'.
    UsePAM yes
-
-   #AllowAgentForwarding yes
-   #AllowTcpForwarding yes
-   #GatewayPorts no
-   X11Forwarding yes
-   #X11DisplayOffset 10
-   #X11UseLocalhost yes
-   #PermitTTY yes
+   X11Forwarding no
    PrintMotd no
-   #PrintLastLog yes
-   #TCPKeepAlive yes
-   #PermitUserEnvironment no
-   #Compression delayed
-   #ClientAliveInterval 0
-   #ClientAliveCountMax 3
-   #UseDNS no
-   #PidFile /run/sshd.pid
-   #MaxStartups 10:30:100
-   #PermitTunnel no
-   #ChrootDirectory none
-   #VersionAddendum none
-
-   # no default banner path
-   #Banner none
-
-   # Allow client to pass locale environment variables
    AcceptEnv LANG LC_*
-
-   # override default of no subsystems
-   Subsystem	sftp	/usr/lib/openssh/sftp-server
-
-   # Example of overriding settings on a per-user basis
-   #Match User anoncvs
-   #	X11Forwarding no
-   #	AllowTcpForwarding no
-   #	PermitTTY no
-   #	ForceCommand cvs server
+   Subsystem sftp /usr/lib/openssh/sftp-server
+   AllowGroups sudo developer
    ```
-5. Restart service SSH
-   ```
+4. Matikan socket bawaan dan jalankan service SSH utama:
+   ```bash
+   sudo systemctl disable --now ssh.socket
    sudo systemctl restart ssh
    ```
 
-### Configure Network Adapter
-1. Pada Ubuntu Server menggunakan netplan sebagai service nya
-   ```
+### Konfigurasi Jaringan (Netplan)
+1. Edit konfigurasi interface jaringan:
+   ```bash
    sudo vi /etc/netplan/50-cloud-init.yaml
    ```
-2. Tambahkan konfigurasi berikut ke `50-cloud-init.yaml`
-   ```
+2. Tetapkan IP statis untuk antarmuka jaringan internal (VMnet2 / ens34):
+   ```yaml
    network:
      version: 2
      ethernets:
-       [Interface]: <- ens33:
+       ens33:
          dhcp4: true
-       [Interface]: <- ens34:
+       ens34:
          dhcp4: false
          addresses:
-           - IP/CIDR <- 2.2.2.2/8
-       [Interface]: <- ens35:
-         dhcp4: false
-         addresses:
-           - IP/CIDR <- 20.20.20.20/24 | 20.20.20.22/24
+           - 10.4.4.1/24
    ```
-3. Aplikasikan konfigurasi `netplan`
-   ```
+3. Aplikasikan perubahan jaringan:
+   ```bash
    sudo netplan apply
    ```
 
-### Tunneling SSH dengan Domain
-1. Buka `cloudflare` dan login: https://cloudflare.com/
-2. Klik `Zero Trust` pada menu Protect & Connect
-3. Klik menu `Network` dan pilih submenu `Overview`
-4. Klik `Manage Tunnels`, klik `Add a Tunnel`
-5. Isi `Tunnel Name` <- PATI
-6. Install dan Run Connector dengan Operating System `Debian`
-7. Buat direktori `scripts`
-   ```
-   sudo mkdir -p /root/setup-scripts/
-   ```
-8. Buat shell script agar memudahkan
-   ```
+### Tunneling Cloudflare Zero Trust
+1. Login ke dasbor Cloudflare (https://cloudflare.com/).
+2. Navigasi ke **Zero Trust** -> **Network** -> **Tunnels**.
+3. Klik **Add a Tunnel**, beri nama `PATI`.
+4. Pilih OS Debian dan salin token instalasinya.
+5. Buat script instalasi lokal:
+   ```bash
    sudo vi /root/setup-scripts/cloudflare.sh
    ```
-9. Tambahkan script berikut
-   ```
-   # Add cloudflare gpg key
+6. Masukkan script instalasi:
+   ```bash
    sudo mkdir -p --mode=0755 /usr/share/keyrings
    curl -fsSL https://pkg.cloudflare.com/cloudflare-public-v2.gpg | sudo tee /usr/share/keyrings/cloudflare-public-v2.gpg >/dev/null
-
-   # Add this repo to your apt repositories
    echo 'deb [signed-by=/usr/share/keyrings/cloudflare-public-v2.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
-
-   # install cloudflared
    sudo apt-get update && sudo apt-get install cloudflared
-
-   # Install Token
    sudo cloudflared service install [TOKEN]
    ```
-10. Beri izin eksekusi
+7.  Eksekusi script tersebut:
+    ```bash
+    sudo bash /root/setup-scripts/cloudflare.sh
     ```
-    sudo chmod +x /root/setup-scripts/cloudflare.sh
-    ```
-11. Jalankan scriptnya
-    ```
-    sudo /root/setup-scripts/cloudflare.sh
-    ```
-12. Isi Hostname `Subdomain` <- ssh, `Domain` <- zeroxx.my.id
-13. Isi Service `Type` <- ssh, `URL` <- localhost:22
+8.  Pada dasbor Cloudflare, set Public Hostname: `ssh.zeroxx.my.id` mengarah ke service `ssh://localhost:2222`.
 
 
-### Network Time Protocol (NTP) Client
-1. Tampilkan detail informasi mengenai waktu
-   ```
-   timedatectl
-   ```
-2. Jika time zone masih wilayah luar
-   ```
+### Sinkronisasi Waktu (NTP Client)
+1. Atur zona waktu ke wilayah Indonesia:
+   ```bash
    sudo timedatectl set-timezone Asia/Jakarta
-   ```
-3. Jika NTP Service tidak aktif
-   ```
    sudo timedatectl set-ntp true
    ```
-4. Lakukan konfigurasi NTP agar waktu sinkron dengan wilayah Indonesia di direktori `systemd`
-   ```
+2. Arahkan sinkronisasi ke server NTP lokal:
+   ```bash
    sudo vi /etc/systemd/timesyncd.conf
    ```
-5. Hilangkan `#` pada bagian `NTP=` dan tambahakan pool seperti berikut
-   ```
+3. Tambahkan konfigurasi pool Indonesia:
+   ```plaintext
    NTP=id.pool.ntp.org
+   FallbackNTP=ntp.ubuntu.com 0.asia.pool.ntp.org
    ```
-6. Lakukan restart service untuk mengaplikasikannya
-   ```
+4. Restart layanan dan verifikasi:
+   ```bash
    sudo systemctl restart systemd-timesyncd
+   timedatectl timesync-status
    ```
 
 ---
 
-## **CORE CONFIGURATION**
-### RAID 1
-1. Install tools `mdadm`
-   ```
+## MANAJEMEN PENYIMPANAN: RAID 1 (MIRRORING)
+1. Install modul *mdadm*:
+   ```bash
    sudo apt install mdadm -y
    ```
-2. Buat RAID antara `sdb` dan `sdc`
-   ``` 
+2. Ciptakan array RAID 1 menggunakan disk `sdb` dan `sdc`:
+   ```bash 
    sudo mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc
    ```
-3. Untuk mengecek status sinkronisasi
-   ```
-   cat /proc/mdstat
-   ```
-4. Format `md0` menjadi file sistem bertipe `ext4`
-   ```
+3. Format disk virtual dengan *filesystem* ext4:
+   ```bash
    sudo mkfs.ext4 /dev/md0
    ```
-5. Buat direktori `/srv`
-   ```
-   sudo mkdir -p /srv
-   ```
-6. Mount disk `md0` ke partisi `/srv` 
-   ```
-   sudo mount /dev/md0 /srv
-   ```
-7. Update konfigurasi di `mdadm`
-   ```
+4. Daftarkan konfigurasi ke sistem secara permanen:
+   ```bash
    sudo mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
-   ```
-8. Update `initramfs`
-   ```
    sudo update-initramfs -u
    ```
-9. Cek UUID `md0`
+5. Konfigurasi Auto-Mount saat Boot:
+   Cek UUID disk menggunakan perintah `sudo blkid /dev/md0`.
+   Masukkan nilai UUID tersebut ke file `/etc/fstab`:
+   ```bash
+   sudo vi /etc/fstab
+   # Tambahkan baris (ganti UUID sesuai hasil blkid lu):
+   UUID=xxx-xxx-xxx /srv ext4 defaults 0 2
    ```
-   sudo blkid /dev/md0
-   ```
-10. Masukan UUID tersebut ke `fstab`
-    ```
-    sudo vi /etc/fstab
-    ```
-12. Masukan konfigurasi berikut
-    ```
-    UUID=[UUID md0] <- UUID=7e9ff6a4-59bf-4711-8713-4da219ff863d /srv  ext4  defaults  0  2
-    ```
-13. Reload `systemd` untuk mengaplikasikannya
-    ```
-    sudo systemctl daemon-reload
-    ```
-
-#### Verifikasi RAID
-1. Unmount partisi `/srv`
-   ```
-   sudo umount /srv
-   ```
-2. Test Auto-Mount dari `fstab`
-   ```
+6. Validasi file sistem:
+   ```bash
    sudo mount -a
-   ```
-3. Cek status
-   ```
-   df -h | grep /srv
-   ```
-
----
-
-### AUTOMATION CONFIGURATION
-#### Membuat Service Startup Update
-1. Buat service baru di direktori `system`
-   ```
-   sudo vi /etc/systemd/system/startup-update.service
-   ```
-2. Tambahkan konfigurasi berikut
-   ```
-   [Unit]
-   Description=Auto Update and Upgrade on Startup
-   After=network-online.target
-   Wants=network-online.target
-
-   [Service]
-   Type=oneshot
-   ExecStart=/usr/bin/apt update -y
-   ExecStart=/usr/bin/apt upgrade -y
-   StandardOutput=journal
-   StandardError=journal
-
-   [Install]
-   WantedBy=multi-user.target
-   ```
-3. Lakukan daemon reload untuk mengaplikasikannya
-   ```
    sudo systemctl daemon-reload
    ```
-4. Aktifkan service yang telah dibuat
+
+## AUTOMATION CONFIGURATION
+### Install Dependensi Skrip
+```bash
+sudo apt install bc libpam-pwquality -y
+```
+
+### 1. Monitoring System Health (Setiap 10 Menit)
+1. Buat script monitoring:
+   ```bash
+   sudo vi /usr/local/sbin/monitor.sh
    ```
-   sudo systemctl enable startup-update.service
+2. Masukkan logika *system check*:
+   ```bash
+   #!/bin/bash
+   PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+   LOG_FILE="/var/log/sysmon.log"
+   TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+
+   CPU_USAGE=$(awk '{print $1*100/NR}' /proc/loadavg)
+   RAM_USAGE=$(free -m | awk 'NR==2{printf "%.2f", $3*100/$2 }')
+   DISK_OS=$(df -h / | awk 'NR==2{print $5}' | sed 's/%//')
+   DISK_RAID=$(df -h /srv | awk 'NR==2{print $5}' | sed 's/%//')
+
+   echo "[$TIMESTAMP] CPU: $CPU_USAGE% | RAM: $RAM_USAGE% | Disk OS: $DISK_OS% | Disk RAID: $DISK_RAID%" >> $LOG_FILE
+
+   if (( $(echo "$CPU_USAGE > 70.0" | bc -l) )); then
+      echo "[$TIMESTAMP] WARNING: CPU Usage tinggi! Terdeteksi $CPU_USAGE%" >> $LOG_FILE
+   fi
    ```
-5. Cek Status Service
-   ```
-   systemctl status [nama].service
-   ```
-6. Cek Log Service Spesifik
-   ```
-   journalctl -u [nama].service
+3. Berikan izin eksekusi
+   ```bash
+   sudo chmod 700 /usr/local/sbin/monitor.sh
    ```
 
-#### Otomasi Reboot Pada 00.00
-1. Edit jadwal di `crontab`
+### 2. Log Audit Keamanan (Berjalan 23:55 WIB)
+1. Buat script pencatatan audit:
+   ```bash
+   sudo vi /usr/local/sbin/audit.sh
    ```
+2. Masukkan skrip forensik:
+   ```bash
+   #!/bin/bash
+   PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+   LOG_FILE="/var/log/audit_summary.log"
+   TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+
+   echo "=== SYSTEM AUDIT & SECURITY REPORT - $TIMESTAMP ===" >> $LOG_FILE
+   echo "[+] LAST LOGIN REPORT:" >> $LOG_FILE
+   lastlog | grep -v "Never logged in" >> $LOG_FILE
+
+   echo "\n[+] FAILED LOGIN ATTEMPTS (Last 24 Hours):" >> $LOG_FILE
+   journalctl --since "24 hours ago" | grep "Failed password" >> $LOG_FILE
+
+   if [ ${PIPESTATUS[1]} -ne 0 ]; then
+      echo "Safe: Tidak ada indikasi brute-force hari ini." >> $LOG_FILE
+   fi
+   echo -e "\n" >> $LOG_FILE
+   ```
+3. Set hak akses:
+   ```bash
+   sudo chmod 700 /usr/local/sbin/audit.sh
+   ```
+
+### 3. Automasi Backup Server (Berjalan 23:30 WIB)
+1. Buat script *archiving* direktori krusial:
+   ```bash
+   sudo vi /usr/local/sbin/daily_backup.sh
+   ```
+2. Masukkan logika backup:
+   ```bash
+   #!/bin/bash
+   PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+   TIMESTAMP=$(date +'%Y-%m-%d')
+   BACKUP_DIR="/srv/backups"
+
+   tar -czf "$BACKUP_DIR/sys_backup_$TIMESTAMP.tar.gz" /etc /var/log /srv/projects /srv/www /root/setup-scripts /usr/local/sbin 2>/dev/null
+   find "$BACKUP_DIR" -type f -name "*.tar.gz" -mtime +7 -exec rm {} \;
+   ```
+3. Set hak akses eksekusi:
+   ```bash
+   sudo chmod 700 /usr/local/sbin/daily_backup.sh
+   ```
+
+### 4. Jadwalkan di Crontab & Konfigurasi Logrotate
+1. Daftarkan seluruh otomatisasi ke dalam Cron:
+   ```bash
    sudo crontab -e
    ```
-2. Tambahkan konfigurasi berikut
+2. Masukkan *rule* jadwal:
+   ```plaintext
+   */10 * * * * /usr/local/sbin/monitor.sh
+   30 23 * * * /usr/local/sbin/daily_backup.sh
+   55 23 * * * /usr/local/sbin/audit.sh
    ```
-   0 0 * * * /usr/bin/systemctl reboot
+3. Buat file putaran log:
+   ```bash
+   sudo vi /etc/logrotate.d/sysadmin_logs
    ```
-3. Mengecek jadwal yang berjalan
-   ```
-   sudo crontab -l
+4. Konfigurasi batas file log:
+   ```plaintext
+   /var/log/sysmon.log /var/log/audit_summary.log {
+      weekly
+      rotate 4
+      create 0600 root root
+      compress
+      missingok
+      notifempty
+   }
    ```
 
----
-
-### WEB SERVER
-#### Apache Configuration
-1. Install Apache
+## USER MANAGEMENT & ACCESS CONTROL LIST (ACL)
+1. Enkripsi standar kualitas *password*:
+   ```bash
+   sudo vi /etc/security/pwquality.conf
+   # Set parameter berikut:
+   minlen = 12
+   minclass = 4
+   usercheck = 1
+   difok = 3
    ```
+2. Buat skrip instalasi akun pengguna:
+   ```bash
+   sudo vi /root/setup-scripts/setup_user.sh
+   ```
+3. Masukkan arsitektur *Role-Based Access Control*:
+   ```bash
+   #!/bin/bash
+   # 1. Bikin Grup Developer
+   groupadd -f developer
+
+   # 2. Pembuatan 4 Akun
+   useradd -m -s /bin/bash -G developer farrel    
+   useradd -m -s /bin/bash -G developer syahdat
+   useradd -s /usr/sbin/nologin dimas            
+   useradd -s /usr/sbin/nologin keysha
+
+   # 3. Set Default Password
+   echo "farrel:PATI_Kelompok#4" | chpasswd
+   echo "syahdat:PATI_Kelompok#4" | chpasswd
+   echo "dimas:PATI_Kelompok#4" | chpasswd
+   echo "keysha:PATI_Kelompok#4" | chpasswd
+
+   # 4. Enforce Password Expiration (Rotasi 5 Hari)
+   chage -M 5 -W 1 farrel
+
+   # 5. Setup Dasar Ownership Folder Samba
+   chown root:developer /srv/projects
+   chown root:developer /srv/projects/internal
+   chown root:developer /srv/projects/eksternal
+
+   # 6. Konfigurasi Access Control List (ACL)
+   # Grup developer diberikan hak akses penuh rwx
+   setfacl -R -m g:developer:rwx /srv/projects
+   setfacl -R -d -m g:developer:rwx /srv/projects
+
+   # Blokir mutlak user nologin dari folder internal
+   setfacl -m u:dimas:--- /srv/projects/internal
+   setfacl -m u:keysha:--- /srv/projects/internal
+   setfacl -d -m u:dimas:--- /srv/projects/internal
+   setfacl -d -m u:keysha:--- /srv/projects/internal
+
+   # Izinkan user nologin masuk dan baca folder eksternal
+   setfacl -m u:dimas:rwx /srv/projects/eksternal
+   setfacl -m u:keysha:rwx /srv/projects/eksternal
+
+   # Implementasi file spesifik read-only untuk Syahdat
+   echo "Data Konfidensial Farrel" > /srv/projects/internal/dokumen_rahasia_farrel.txt
+   setfacl -m u:syahdat:r-- /srv/projects/internal/dokumen_rahasia_farrel.txt
+
+   echo "[+] Setup Akun dan ACL Selesai!"
+   ```
+4. Eksekusi skrip:
+   ```bash
+   sudo bash /root/setup-scripts/setup_user.sh
+   ```
+
+## FILE SHARING (SAMBA SERVER)
+1. Instalasi Samba:
+  ```bash
+  sudo apt install samba -y
+  ```
+2. Buat identitas kredensial SMB untuk anggota jaringan:
+   ```
+   sudo smbpasswd -a farrel
+   sudo smbpasswd -a syahdat
+   ```
+3. Modifikasi konfigurasi sistem *sharing*:
+   ```
+   sudo cp /etc/samba/smb.conf /etc/samba/smb.conf.bak
+   sudo vi /etc/samba/smb.conf
+   ```
+4. Sisipkan parameter jaringan *secure* di baris akhir:
+   ```toml
+   [Projects]
+      comment = Internal Corporate Projects
+      path = /srv/projects
+      browseable = yes
+      read only = no
+      valid users = @developer, dimas, keysha
+      create mask = 0770
+      directory mask = 0770
+      vfs objects = acl_xattr
+      map acl inherit = yes
+   ```
+5. Restart *daemon*:
+   ```bash
+   sudo systemctl restart smbd nmbd
+   ```
+
+## INTERNAL DNS (BIND9)
+1. Instalasi modul resolusi nama domain:
+   ```bash
+   sudo apt install bind9 bind9utils bind9-doc dnsutils -y
+   ```
+2. Daftarkan zona lokal `corp4.local`:
+   ```bash
+   sudo vi /etc/bind/named.conf.local
+   ```
+   Tambahkan blok ini:
+   ```palintext
+   zone "corp4.local" {
+      type master;
+      file "/etc/bind/db.corp4.local";
+   };
+   ```
+3. Buat *database* DNS internal:
+   ```bash
+   sudo cp /etc/bind/db.local /etc/bind/db.corp4.local
+   sudo vi /etc/bind/db.corp4.local
+   ```
+4. Konfigurasikan *record* A, MX, dan CNAME:
+   ```plaintext
+   $TTL    604800
+   @       IN      SOA     ns1.corp4.local. admin.corp4.local. (
+                                 2         ; Serial
+                            604800         ; Refresh
+                             86400         ; Retry
+                           2419200         ; Expire
+                            604800 )       ; Negative Cache TTL
+   ;
+   @       IN      NS      ns1.corp4.local.
+   @       IN      MX  10  mail.corp4.local.
+
+   ns1     IN      A       10.4.4.1
+   mail    IN      A       10.4.4.1
+   git     IN      A       127.0.0.1
+   dev     IN      CNAME   git
+   ```
+5. *Restart* layanan dan lakukan validasi resolusi DNS:
+   ```bash
+   sudo systemctl restart bind9
+
+   # Pengujian
+   dig git.corp4.local
+   host mail.corp4.local
+   nslookup dev.corp4.local
+   ```
+
+## WEB SERVER (APACHE)
+1. Instalasi modul Apache:
+   ```bash
    sudo apt install apache2 -y
    ```
-2. Buat folder web di RAID
-   ```
-   sudo mkdir -p /srv/www/html
-   ```
-3. Edit konfigurasi default Apache
-   ```
+2. Isolasi *Directory Root* ke disk RAID:
+   ```bash
    sudo vi /etc/apache2/sites-available/000-default.conf
+   # Ubah DocumentRoot menjadi /srv/www/html
    ```
-4. Ubah konfigurasi sebagai berikut
-   ```
-   DocumentRoot /srv/www/html
-   ```
-5. Edit konfigurasi utama Apache
-   ```
+3. Aktifkan *permission* pada direktori khusus di file sentral:
+   ```bash
    sudo vi /etc/apache2/apache2.conf
-   ```
-6. Ubah konfigurasi sebagai berikut
-   ```
+   # Tambahkan:
    <Directory /srv/www/>
-      Options Indexes FollowSymLinks
+      Options -Indexes +FollowSymLinks
       AllowOverride None
       Require all granted
    </Directory>
    ```
-7. Restart service Apache
+4. Tutup celah informasi versi OS (Security Hardening):
+   ```bash
+   sudo vi /etc/apache2/conf-available/security.conf
+   # Pastikan bernilai:
+   ServerTokens Prod
+   ServerSignature Off
    ```
+5. Terapkan konfigurasi:
+   ```bash
    sudo systemctl restart apache2
    ```
 
----
+## FIREWALL (NFTABLES ZERO-TRUST)
+1. Pasang *nftables* dan matikan *firewall* lawas (UFW):
+   ```bash
+   sudo apt install nftables -y
+   sudo systemctl disable --now ufw
+   sudo systemctl mask ufw
+   ```
+2. Buat *ruleset* tingkat kernel:
+   ```bash
+   sudo vi /etc/nftables.conf
+   ```
+3. Masukkan postur penolakan *default* (Default Drop Policy):
+   ```plaintext
+   #!/usr/sbin/nft -f
+   flush ruleset
+   table inet filter {
+       chain input {
+           type filter hook input priority 0; policy drop;
+   
+           iif "lo" accept
+           ct state established,related accept
+   
+           # Cloudflare & Web Access
+           tcp dport 2222 accept
+           tcp dport { 80, 443 } accept
+           udp dport 7844 accept
 
-## **OPSIONAL**
-### Install Desktop Environment
-1. Install Desktop Environment XFCE
+           # Isolasi Jaringan Internal via ens34
+           iifname "ens34" tcp dport 53 accept
+           iifname "ens34" udp dport 53 accept
+           iifname "ens34" tcp dport { 139, 445 } accept
+           iifname "ens34" udp dport { 137, 138 } accept
+   
+           # Proteksi Ping Flood
+           ip protocol icmp limit rate 10/second accept
+       }
+       chain forward {
+           type filter hook forward priority 0; policy drop;
+       }
+       chain output {
+           type filter hook output priority 0; policy accept;
+       }
+   }
    ```
-   sudo apt install xubuntu-desktop task-xfce-desktop -y
+4. Nyalakan dan aplikasikan ruleset:
+   ```bash
+   sudo systemctl enable nftables
+   sudo nft -f /etc/nftables.conf
    ```
-2. Lakukan restart untuk mengaplikasikannya.
-   ```
-   reboot
-   ```
+
+## OPSIONAL (CLIENT & GUI)
+### Desktop Environment Ringan
+```bash
+sudo apt install xubuntu-desktop task-xfce-desktop -y
+reboot
+```
 
 ### Copy File on SSH
 1. Copy file dari server ke lokal
@@ -498,54 +551,23 @@ Iso dapat diunduh di
    scp [Path File Lokal] [Username]@[IP/Domain]:[Path File Server] 
    ```
 
-### SSH Client
-1. Windows
-   - Install
-     - https://github.com/cloudflare/cloudflared/releases/download/2026.3.0/cloudflared-windows-amd64.exe
-     - https://github.com/cloudflare/cloudflared/releases/download/2026.3.0/cloudflared-windows-amd64.msi
-     - Connect
-       ```
-       ssh -o "ProxyCommand=cloudflared access ssh --hostname ssh.zeroxx.my.id" [Username]@ssh.zeroxx.my.id
-       ```
-2. Linux Debian
-   - Install
+### SSH Client via Cloudflare (Remote Work)
+#### Windows
+1. Unduh `.exe`:
+   ```
+   https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe
+   ```
+2. Modifikasi SSH config:
+   ```dos
+   ssh -o "ProxyCommand=cloudflared access ssh --hostname ssh.zeroxx.my.id" william@ssh.zeroxx.my.id
+   ```
+#### Linux (Debian/Ubuntu) / Mac (Homebrew)
+1. Instal paket:
+   ```bash
+   brew install cloudflared # Untuk MacOS
+   sudo apt install cloudflared # Untuk Linux
+   ```
+2. Hubungkan ke server:
      ```
-     wget https://github.com/cloudflare/cloudflared/releases/download/2026.3.0/cloudflared-linux-amd64.deb
-     sudo dpkg -i cloudflared-linux-amd64.deb
-     ```
-   - Connect
-     ```
-     ssh -o "ProxyCommand=cloudflared access ssh --hostname ssh.zeroxx.my.id" [Username]@ssh.zeroxx.my.id
-     ```
-3. Mac Intel
-   - Install melalui package manager
-     ```
-     brew install cloudflared
-     ```
-   - Install melalui package binary
-     ```
-     curl -O https://github.com/cloudflare/cloudflared/releases/download/2026.3.0/cloudflared-darwin-amd64.tgz
-     tar -xvzf cloudflared-darwin-amd64.tgz
-     sudo mv cloudflared /usr/local/bin/
-     sudo chmod +x /usr/local/bin/cloudflared
-     ```
-   - Connect
-     ```
-     ssh -o "ProxyCommand=/usr/local/bin/cloudflared access ssh --hostname ssh.zeroxx.my.id" [Username]@ssh.zeroxx.my.id
-     ```
-4. Mac M1/M2/M3 (Apple Silicon)
-   - Install melalui package manager
-     ```
-     brew install cloudflared
-     ```
-   - Install melalui package binary
-     ```
-     curl -O https://github.com/cloudflare/cloudflared/releases/download/2026.3.0/cloudflared-darwin-arm64.tgz
-     tar -xvzf cloudflared-darwin-arm64.tgz
-     sudo mv cloudflared /usr/local/bin/
-     sudo chmod +x /usr/local/bin/cloudflared
-     ```
-   - Connect
-     ```
-     ssh -o "ProxyCommand=/usr/local/bin/cloudflared access ssh --hostname ssh.zeroxx.my.id" [Username]@ssh.zeroxx.my.id
+     ssh -o "ProxyCommand=cloudflared access ssh --hostname ssh.zeroxx.my.id" william@ssh.zeroxx.my.id
      ```
