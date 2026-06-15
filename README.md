@@ -90,6 +90,7 @@ sudo mkdir -p /srv/backups             # Penyimpanan arsip otomatis
 4. Matikan socket bawaan dan jalankan service SSH utama:
    ```bash
    sudo systemctl disable --now ssh.socket
+   sudo enable ssh
    sudo systemctl restart ssh
    ```
 
