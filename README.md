@@ -450,6 +450,7 @@ sudo apt install bc libpam-pwquality -y
 
    # Pengujian
    dig git.corp4.local
+   dig www.corp4.local
    host mail.corp4.local
    nslookup dev.corp4.local
    ```
