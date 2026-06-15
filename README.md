@@ -452,6 +452,19 @@ sudo apt install bc libpam-pwquality -y
    host mail.corp4.local
    nslookup dev.corp4.local
    ```
+6. Edit file resolved:
+   ```bash
+   sudo vi /etc/systemd/resolved.conf
+   ```
+7. Hapus tanda pagar (#) dan ubah baris ini:
+   ```plainteext
+   DNS=127.0.0.1
+   Domains=~corp4.local
+   ```
+8. Restart resolver-nya:
+   ```bash
+   sudo systemctl restart systemd-resolved
+   ```
 
 ## WEB SERVER (APACHE)
 1. Instalasi modul Apache:
