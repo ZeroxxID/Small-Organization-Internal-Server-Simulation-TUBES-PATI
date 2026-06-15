@@ -440,6 +440,7 @@ sudo apt install bc libpam-pwquality -y
 
    ns1     IN      A       10.4.4.1
    mail    IN      A       10.4.4.1
+   www     IN      A       10.4.4.1
    git     IN      A       127.0.0.1
    dev     IN      CNAME   git
    ```
