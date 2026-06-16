@@ -333,8 +333,8 @@ sudo apt install acl -y
    # 2. Pembuatan 4 Akun
    useradd -m -s /bin/bash -G developer farrel    
    useradd -m -s /bin/bash -G developer syahdat
-   useradd -s /usr/sbin/nologin dimas            
-   useradd -s /usr/sbin/nologin keysha
+   useradd -M -s /usr/sbin/nologin dimas            
+   useradd -M -s /usr/sbin/nologin keysha
 
    # 3. Set Default Password
    echo "farrel:PATI_Kelompok#4" | chpasswd
@@ -342,15 +342,24 @@ sudo apt install acl -y
    echo "dimas:PATI_Kelompok#4" | chpasswd
    echo "keysha:PATI_Kelompok#4" | chpasswd
 
-   # 4. Enforce Password Expiration (Rotasi 5 Hari)
+   # 4. Otomatisasi Sinkronisasi Database Samba (CRITICAL FOR LOGIN)
+   # Pipe password secara non-interaktif agar tersimpan di database Samba
+   echo -e "PATI_Kelompok#4#administrator\nPATI_Kelompok#4#administrator" | smbpasswd -a -s william
+   echo -e "PATI_Kelompok#4\nPATI_Kelompok#4" | smbpasswd -a -s farrel
+   echo -e "PATI_Kelompok#4\nPATI_Kelompok#4" | smbpasswd -a -s syahdat
+   echo -e "PATI_Kelompok#4\nPATI_Kelompok#4" | smbpasswd -a -s dimas
+   echo -e "PATI_Kelompok#4\nPATI_Kelompok#4" | smbpasswd -a -s keysha
+
+   # 5. Enforce Password Expiration (Rotasi 5 Hari)
    chage -M 5 -W 1 farrel
 
-   # 5. Setup Dasar Ownership Folder Samba
-   chown root:developer /srv/projects
-   chown root:developer /srv/projects/internal
-   chown root:developer /srv/projects/eksternal
+   # 6. Setup Dasar Ownership Folder Samba
+   chown -R root:developer /srv/projects
+   chmod 2770 /srv/projects
+   chmod 2770 /srv/projects/internal
+   chmod 2770 /srv/projects/eksternal
 
-   # 6. Konfigurasi Access Control List (ACL)
+   # 7. Konfigurasi Access Control List (ACL)
    # Grup developer diberikan hak akses penuh rwx
    setfacl -R -m g:developer:rwx /srv/projects
    setfacl -R -d -m g:developer:rwx /srv/projects
@@ -364,12 +373,19 @@ sudo apt install acl -y
    # Izinkan user nologin masuk dan baca folder eksternal
    setfacl -m u:dimas:rwx /srv/projects/eksternal
    setfacl -m u:keysha:rwx /srv/projects/eksternal
+   setfacl -d -m u:dimas:rwx /srv/projects/eksternal
+   setfacl -d -m u:keysha:rwx /srv/projects/eksternal
 
    # Implementasi file spesifik
    echo "Data Konfidensial Farrel" > /srv/projects/internal/dokumen_rahasia_farrel.txt
    echo "Data Konfidensial Syahdat" > /srv/projects/internal/dokumen_rahasia_syahdat.txt
+   
+   setfacl -b /srv/projects/internal/dokumen_rahasia_farrel.txt
+   setfacl -b /srv/projects/internal/dokumen_rahasia_syahdat.txt
+
    sudo chown farrel:developer /srv/projects/internal/dokumen_rahasia_farrel.txt
    sudo chown syahdat:developer /srv/projects/internal/dokumen_rahasia_syahdat.txt
+   
    chmod 0600 /srv/projects/internal/dokumen_rahasia_farrel.txt
    chmod 0660 /srv/projects/internal/dokumen_rahasia_syahdat.txt
 
@@ -408,8 +424,12 @@ sudo apt install acl -y
       valid users = @sudo, @developer, dimas, keysha
       create mask = 0770
       directory mask = 0770
+      force create mode = 0770
+      force directory mode = 0770
+      force group = developer
       vfs objects = acl_xattr
       map acl inherit = yes
+      inherit acls = yes
    ```
 5. Restart *daemon*:
    ```bash
