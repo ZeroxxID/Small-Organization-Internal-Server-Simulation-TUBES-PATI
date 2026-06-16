@@ -378,15 +378,19 @@ sudo apt install acl -y
 
    # Implementasi file spesifik
    echo "Data Konfidensial Farrel" > /srv/projects/internal/dokumen_rahasia_farrel.txt
+   echo "Farrel: tidur, Syahdat: Kerja" > /srv/projects/internal/pembagian_tugas.txt
    echo "Data Konfidensial Syahdat" > /srv/projects/internal/dokumen_rahasia_syahdat.txt
    
    setfacl -b /srv/projects/internal/dokumen_rahasia_farrel.txt
+   setfacl -b /srv/projects/internal/pembagian_tugas.txt
    setfacl -b /srv/projects/internal/dokumen_rahasia_syahdat.txt
 
-   sudo chown farrel:developer /srv/projects/internal/dokumen_rahasia_farrel.txt
-   sudo chown syahdat:developer /srv/projects/internal/dokumen_rahasia_syahdat.txt
+   chown farrel:developer /srv/projects/internal/dokumen_rahasia_farrel.txt
+   chown farrel:developer /srv/projects/internal/pembagian_tugas.txt
+   chown syahdat:developer /srv/projects/internal/dokumen_rahasia_syahdat.txt
    
    chmod 0600 /srv/projects/internal/dokumen_rahasia_farrel.txt
+   chmod 0640 farrel:developer /srv/projects/internal/pembagian_tugas.txt
    chmod 0660 /srv/projects/internal/dokumen_rahasia_syahdat.txt
 
    echo "[+] Setup Akun dan ACL Selesai!"
