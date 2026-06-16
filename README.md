@@ -1,38 +1,48 @@
 # SMALL ORGANIZATION INTERNAL SERVER SIMULATION GUIDE
 
+## 👥 Tim Penyusun (Kelompok 4)
+* **Administrator:** William
+* **Anggota 1:** Farrel
+* **Anggota 2:** Syahdat
+* **Anggota 3:** Dimas
+* **Anggota 4:** Keysha
+  
+---
+
 ## Pengenalan
 ### Virtualisasi
 Virtualisasi adalah teknologi yang mensimulasikan perangkat keras, sistem operasi, ataupun jaringan di dalam satu mesin fisik. 
-* VirtualBox: https://www.virtualbox.org/wiki/Downloads
-* VMWare Workstation: https://support.broadcom.com/group/ecx/downloads
+* **VirtualBox:** [Download di sini](https://www.virtualbox.org/wiki/Downloads)
+* **VMWare Workstation:** [Download di sini](https://support.broadcom.com/group/ecx/downloads)
 
 ---
 
 ## PERSIAPAN
 
 ### Unduh Ubuntu Server
-Iso dapat diunduh di
-* Global: https://ubuntu.com/download/server
-* Rilis Noble: https://releases.ubuntu.com/noble/
-* Mirror Lokal (Cepat): https://mirror.unair.ac.id/ubuntu-cd/
+File ISO dapat diunduh melalui tautan berikut:
+* **Global:** [Ubuntu Server](https://ubuntu.com/download/server)
+* **Rilis Noble (24.04):** [Ubuntu Releases](https://releases.ubuntu.com/noble/)
+* **Mirror Lokal (Lebih Cepat):** [Unair Mirror](https://mirror.unair.ac.id/ubuntu-cd/)
 
 ### Spesifikasi Virtual Machine (VM)
-* Nama: PATI Kelompok 4
-* Disk: 64 GB x 3 (1 OS utama, 2 disk untuk RAID 1)
-* Memory: 8 GB
-* Procesor: 8 Cores
-* Network Adapter 1 (Bridge): Mode DHCP untuk internet
-* Network Adapter 2 (Custom VMnet2): Mode Static untuk LAN Internal
+* **Nama VM:** PATI Kelompok 4
+* **Disk:** 64 GB x 3 (1 OS Utama, 2 Disk untuk RAID 1)
+* **Memory:** 8 GB
+* **Processor:** 8 Cores
+* **Network Adapter 1 (Bridge):** Mode DHCP (Akses Internet)
+* **Network Adapter 2 (Custom VMnet2):** Mode Static (LAN Internal)
 
 
 ### Instalasi OS Ubuntu Server
-* Bahasa: English
-* Keyboard Layout: English (US) 
-* Mirror Address: https://mirror.unair.ac.id/ubuntu
-* Name: PATI Kelompok 4
-* Servers Name: corp4
-* User: william
-* Password: PATI_Kelompok#4#administrator
+Pastikan konfigurasi saat instalasi sesuai dengan parameter berikut:
+* **Bahasa:** English
+* **Keyboard Layout:** English (US) 
+* **Mirror Address:** `https://mirror.unair.ac.id/ubuntu`
+* **Name:** PATI Kelompok 4
+* **Servers Name:** corp4
+* **User:** william
+* **Password:** `PATI_Kelompok#4#administrator`
 
 ---
 
