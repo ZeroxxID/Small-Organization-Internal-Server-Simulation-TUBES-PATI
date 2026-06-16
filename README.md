@@ -481,22 +481,22 @@ sudo apt install acl -y
       8.8.8.8;
    };
    ```
-6. *Restart* layanan dan lakukan validasi resolusi DNS:
-   ```bash
-   sudo systemctl restart bind9
-   ```
-7. Edit file resolved:
+6. Edit file resolved:
    ```bash
    sudo vi /etc/systemd/resolved.conf
    ```
-8. Hapus tanda pagar (#) dan ubah baris ini:
+7. Hapus tanda pagar (#) dan ubah baris ini:
    ```plaintext
    DNS=127.0.0.1
    Domains=~corp4.local
    ```
-9. Restart resolver-nya:
+8. Restart resolver-nya:
    ```bash
    sudo systemctl restart systemd-resolved
+   ```
+9. *Restart* layanan dan lakukan validasi resolusi DNS:
+   ```bash
+   sudo systemctl restart bind9
    ```
 10. Pengujian
     ```
