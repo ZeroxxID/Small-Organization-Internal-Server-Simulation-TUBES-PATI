@@ -402,23 +402,15 @@ sudo apt install acl -y
 
 ## FILE SHARING (SAMBA SERVER)
 1. Instalasi Samba:
-  ```bash
-  sudo apt install samba -y
-  ```
-2. Buat identitas kredensial SMB untuk anggota jaringan:
+   ```bash
+   sudo apt install samba -y
    ```
-   sudo smbpasswd -a william
-   sudo smbpasswd -a farrel
-   sudo smbpasswd -a syahdat
-   sudo smbpasswd -a dimas
-   sudo smbpasswd -a keysha
-   ```
-3. Modifikasi konfigurasi sistem *sharing*:
+2. Modifikasi konfigurasi sistem *sharing*:
    ```
    sudo cp /etc/samba/smb.conf /etc/samba/smb.conf.bak
    sudo vi /etc/samba/smb.conf
    ```
-4. Sisipkan parameter jaringan *secure* di baris akhir:
+3. Sisipkan parameter jaringan *secure* di baris akhir:
    ```toml
    [Projects]
       comment = Internal Corporate Projects
@@ -435,7 +427,7 @@ sudo apt install acl -y
       map acl inherit = yes
       inherit acls = yes
    ```
-5. Restart *daemon*:
+4. Restart *daemon*:
    ```bash
    sudo systemctl restart smbd nmbd
    ```
