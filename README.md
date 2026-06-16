@@ -367,7 +367,7 @@ sudo apt install acl -y
 
    # Implementasi file spesifik read-only untuk Syahdat
    echo "Data Konfidensial Farrel" > /srv/projects/internal/dokumen_rahasia_farrel.txt
-   setfacl -m u:syahdat:r-- /srv/projects/internal/dokumen_rahasia_farrel.txt
+   setfacl -m u:syahdat:--- /srv/projects/internal/dokumen_rahasia_farrel.txt
 
    echo "[+] Setup Akun dan ACL Selesai!"
    ```
