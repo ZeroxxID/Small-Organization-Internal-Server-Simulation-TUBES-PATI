@@ -446,7 +446,7 @@ sudo apt install acl -y
    sudo vi /etc/bind/named.conf.local
    ```
    Tambahkan blok ini:
-   ```palintext
+   ```plaintext
    zone "corp4.local" {
       type master;
       file "/etc/bind/db.corp4.local";
@@ -476,28 +476,38 @@ sudo apt install acl -y
    git     IN      A       127.0.0.1
    dev     IN      CNAME   git
    ```
-5. *Restart* layanan dan lakukan validasi resolusi DNS:
+5. Edit file `named.conf.options`
+   ```
+   sudo vi /etc/bind/named.conf.options
+   # Ubah menjadi berikut
+   forwarders {
+      1.1.1.1;
+      8.8.8.8;
+   };
+   ```
+6. *Restart* layanan dan lakukan validasi resolusi DNS:
    ```bash
    sudo systemctl restart bind9
-
-   # Pengujian
+   ```
+7. Edit file resolved:
+   ```bash
+   sudo vi /etc/systemd/resolved.conf
+   ```
+8. Hapus tanda pagar (#) dan ubah baris ini:
+   ```plaintext
+   DNS=127.0.0.1
+   Domains=~corp4.local
+   ```
+9. Restart resolver-nya:
+   ```bash
+   sudo systemctl restart systemd-resolved
+   ```
+10. Pengujian
+   ```
    dig git.corp4.local
    dig www.corp4.local
    host mail.corp4.local
    nslookup dev.corp4.local
-   ```
-6. Edit file resolved:
-   ```bash
-   sudo vi /etc/systemd/resolved.conf
-   ```
-7. Hapus tanda pagar (#) dan ubah baris ini:
-   ```plainteext
-   DNS=127.0.0.1
-   Domains=~corp4.local
-   ```
-8. Restart resolver-nya:
-   ```bash
-   sudo systemctl restart systemd-resolved
    ```
 
 ## WEB SERVER (APACHE)
@@ -592,11 +602,11 @@ reboot
 ### Copy File on SSH
 1. Copy file dari server ke lokal
    ```
-   scp [Username]@[IP/Domain]:[Path File Server] [Path File Lokal]
+   scp -P 2222 [Username]@[IP/Domain]:[Path File Server] [Path File Lokal]
    ```
 2. Copy file dari lokal ke server
    ```
-   scp [Path File Lokal] [Username]@[IP/Domain]:[Path File Server] 
+   scp -P 2222 [Path File Lokal] [Username]@[IP/Domain]:[Path File Server] 
    ```
 
 ### SSH Client via Cloudflare (Remote Work)
