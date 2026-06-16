@@ -503,12 +503,12 @@ sudo apt install acl -y
    sudo systemctl restart systemd-resolved
    ```
 10. Pengujian
-   ```
-   dig git.corp4.local
-   dig www.corp4.local
-   host mail.corp4.local
-   nslookup dev.corp4.local
-   ```
+    ```
+    dig git.corp4.local
+    dig www.corp4.local
+    host mail.corp4.local
+    nslookup dev.corp4.local
+    ```
 
 ## WEB SERVER (APACHE)
 1. Instalasi modul Apache:
