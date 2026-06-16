@@ -365,9 +365,14 @@ sudo apt install acl -y
    setfacl -m u:dimas:rwx /srv/projects/eksternal
    setfacl -m u:keysha:rwx /srv/projects/eksternal
 
-   # Implementasi file spesifik read-only untuk Syahdat
+   # Implementasi file spesifik
    echo "Data Konfidensial Farrel" > /srv/projects/internal/dokumen_rahasia_farrel.txt
+   echo "Data Konfidensial Syahdat" > /srv/projects/internal/dokumen_rahasia_syahdat.txt
    setfacl -m u:syahdat:--- /srv/projects/internal/dokumen_rahasia_farrel.txt
+   ch
+
+   sudo chown farrel:developer /srv/projects/internal/dokumen_rahasia_farrel.txt
+   sudo chown syahdat:developer /srv/projects/internal/dokumen_rahasia_syahdat.txt
 
    echo "[+] Setup Akun dan ACL Selesai!"
    ```
