@@ -383,8 +383,11 @@ sudo apt install acl -y
   ```
 2. Buat identitas kredensial SMB untuk anggota jaringan:
    ```
+   sudo smbpasswd -a william
    sudo smbpasswd -a farrel
    sudo smbpasswd -a syahdat
+   sudo smbpasswd -a dimas
+   sudo smbpasswd -a keysha
    ```
 3. Modifikasi konfigurasi sistem *sharing*:
    ```
@@ -398,7 +401,7 @@ sudo apt install acl -y
       path = /srv/projects
       browseable = yes
       read only = no
-      valid users = @developer, dimas, keysha
+      valid users = @sudo, @developer, dimas, keysha
       create mask = 0770
       directory mask = 0770
       vfs objects = acl_xattr
