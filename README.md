@@ -306,6 +306,11 @@ sudo apt install bc libpam-pwquality -y
    ```
 
 ## USER MANAGEMENT & ACCESS CONTROL LIST (ACL)
+### Install Dependensi Skrip
+```bash
+sudo apt install acl -y
+```
+
 1. Enkripsi standar kualitas *password*:
    ```bash
    sudo vi /etc/security/pwquality.conf
