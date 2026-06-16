@@ -191,8 +191,8 @@ sudo mkdir -p /srv/backups             # Penyimpanan arsip otomatis
    ```
 6. Validasi file sistem:
    ```bash
-   sudo mount -a
    sudo systemctl daemon-reload
+   sudo mount -a
    ```
 
 ## AUTOMATION CONFIGURATION
