@@ -400,6 +400,7 @@ sudo apt install acl -y
    chown syahdat:developer /srv/projects/internal/dokumen_rahasia_syahdat.txt
    
    chmod 0600 /srv/projects/internal/dokumen_rahasia_farrel.txt
+   sudo setfacl -m u:william:rw /srv/projects/internal/dokumen_rahasia_farrel.txt
    chmod 0640 /srv/projects/internal/pembagian_tugas.txt
    chmod 0660 /srv/projects/internal/dokumen_rahasia_syahdat.txt
 
