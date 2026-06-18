@@ -180,7 +180,7 @@ sudo mkdir -p /srv/backups             # Penyimpanan arsip otomatis
    ```
 2. Ciptakan array RAID 1 menggunakan disk `sdb` dan `sdc`:
    ```bash 
-   sudo mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc
+   sudo mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sda /dev/sdb
    ```
 3. Format disk virtual dengan *filesystem* ext4:
    ```bash
