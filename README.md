@@ -255,7 +255,7 @@ sudo apt install bc libpam-pwquality -y
    echo "[+] LAST LOGIN REPORT:" >> $LOG_FILE
    lastlog | grep -v "Never logged in" >> $LOG_FILE
 
-   echo "\n[+] FAILED LOGIN ATTEMPTS (Last 24 Hours):" >> $LOG_FILE
+   echo "[+] FAILED LOGIN ATTEMPTS (Last 24 Hours):" >> $LOG_FILE
    journalctl --since "24 hours ago" | grep "Failed password" >> $LOG_FILE
 
    if [ ${PIPESTATUS[1]} -ne 0 ]; then
