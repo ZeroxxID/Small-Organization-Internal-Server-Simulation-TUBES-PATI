@@ -373,6 +373,7 @@ sudo apt install acl -y
    # Grup developer diberikan hak akses penuh rwx
    setfacl -R -m g:developer:rwx /srv/projects
    setfacl -R -d -m g:developer:rwx /srv/projects
+   setfacl -R -d -m u:william:rwx /srv/projects
 
    # Blokir mutlak user nologin dari folder internal
    setfacl -m u:dimas:--- /srv/projects/internal
@@ -402,7 +403,9 @@ sudo apt install acl -y
    chmod 0600 /srv/projects/internal/dokumen_rahasia_farrel.txt
    sudo setfacl -m u:william:rw /srv/projects/internal/dokumen_rahasia_farrel.txt
    chmod 0640 /srv/projects/internal/pembagian_tugas.txt
+   sudo setfacl -m u:william:rw /srv/projects/internal/pembagian_tugas.txt
    chmod 0660 /srv/projects/internal/dokumen_rahasia_syahdat.txt
+   sudo setfacl -m u:william:rw /srv/projects/internal/dokumen_rahasia_syahdat.txt
 
    echo "[+] Setup Akun dan ACL Selesai!"
    ```
