@@ -258,8 +258,8 @@ sudo apt install bc libpam-pwquality -y
    echo "[+] FAILED LOGIN ATTEMPTS (Last 24 Hours):" >> $LOG_FILE
    journalctl --since "24 hours ago" | grep "Failed password" >> $LOG_FILE
 
-   if [ ${PIPESTATUS[1]} -ne 0 ]; then
-      echo "Safe: Tidak ada indikasi brute-force hari ini." >> $LOG_FILE
+   if ! journalctl --since "24 hours ago" | grep -q "Failed password"; then
+     echo "Safe: Tidak ada indikasi brute-force hari ini." >> $LOG_FILE
    fi
    echo -e "\n" >> $LOG_FILE
    ```
