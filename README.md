@@ -223,7 +223,7 @@ sudo apt install bc libpam-pwquality -y
    LOG_FILE="/var/log/sysmon.log"
    TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
-   CPU_USAGE=$(awk '{print $1*100/NR}' /proc/loadavg)
+   CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8}')  
    RAM_USAGE=$(free -m | awk 'NR==2{printf "%.2f", $3*100/$2 }')
    DISK_OS=$(df -h / | awk 'NR==2{print $5}' | sed 's/%//')
    DISK_RAID=$(df -h /srv | awk 'NR==2{print $5}' | sed 's/%//')
@@ -373,7 +373,7 @@ sudo apt install acl -y
    # 6. Setup Dasar Ownership Folder Samba
    chown -R root:developer /srv/projects
    chmod 2770 /srv/projects
-   chmod 2770 /srv/projects/internal
+   chmod 3770 /srv/projects/internal
    chmod 2770 /srv/projects/eksternal
 
    # 7. Konfigurasi Access Control List (ACL)
