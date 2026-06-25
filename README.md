@@ -403,13 +403,12 @@ sudo apt install acl -y
    chown syahdat:developer /srv/projects/internal/dokumen_rahasia_syahdat.txt
    
    chmod 0600 /srv/projects/internal/dokumen_rahasia_farrel.txt
+   chmod 0600 /srv/projects/internal/pembagian_tugas.txt
+   chmod 0600 /srv/projects/internal/dokumen_rahasia_syahdat.txt
+   
    sudo setfacl -m u:william:rw /srv/projects/internal/dokumen_rahasia_farrel.txt
-   
-   chmod 0640 /srv/projects/internal/pembagian_tugas.txt
-   sudo setfacl -m u:william:rw /srv/projects/internal/pembagian_tugas.txt
-   
-   chmod 0660 /srv/projects/internal/dokumen_rahasia_syahdat.txt
-   sudo setfacl -m u:william:rw /srv/projects/internal/dokumen_rahasia_syahdat.txt
+   sudo setfacl -m u:william:rw,u:syahdat:r-- /srv/projects/internal/pembagian_tugas.txt
+   sudo setfacl -m u:william:rw,u:farrel:rw /srv/projects/internal/dokumen_rahasia_syahdat.txt
 
    echo "[+] Setup Akun dan ACL Selesai!"
    ```
