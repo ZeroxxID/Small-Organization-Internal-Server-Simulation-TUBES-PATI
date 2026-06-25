@@ -406,9 +406,9 @@ sudo apt install acl -y
    chmod 0600 /srv/projects/internal/pembagian_tugas.txt
    chmod 0600 /srv/projects/internal/dokumen_rahasia_syahdat.txt
    
-   sudo setfacl -m u:william:rw,u:syahdat:--- /srv/projects/internal/dokumen_rahasia_farrel.txt
-   sudo setfacl -m u:william:rw,u:syahdat:r-- /srv/projects/internal/pembagian_tugas.txt
-   sudo setfacl -m u:william:rw,u:farrel:rw /srv/projects/internal/dokumen_rahasia_syahdat.txt
+   setfacl -m u:william:rw,u:syahdat:--- /srv/projects/internal/dokumen_rahasia_farrel.txt
+   setfacl -m u:william:rw,u:syahdat:r-- /srv/projects/internal/pembagian_tugas.txt
+   setfacl -m u:william:rw,u:farrel:rw /srv/projects/internal/dokumen_rahasia_syahdat.txt
 
    echo "[+] Setup Akun dan ACL Selesai!"
    ```
