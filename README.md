@@ -256,10 +256,12 @@ sudo apt install bc libpam-pwquality -y
    lastlog | grep -v "Never logged in" >> $LOG_FILE
 
    echo "[+] FAILED LOGIN ATTEMPTS (Last 24 Hours):" >> $LOG_FILE
-   journalctl --since "24 hours ago" | grep "Failed password" >> $LOG_FILE
+   FAILED_LOGINS=$(journalctl --since "24 hours ago" | grep "Failed password")
 
-   if ! journalctl --since "24 hours ago" | grep -q "Failed password"; then
+   if [ -z "$FAILED_LOGINS" ]; then
      echo "Safe: Tidak ada indikasi brute-force hari ini." >> $LOG_FILE
+   else
+     echo "$FAILED_LOGINS" >> $LOG_FILE
    fi
    echo -e "\n" >> $LOG_FILE
    ```
